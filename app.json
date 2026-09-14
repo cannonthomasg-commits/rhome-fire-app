@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Rhome Fire",
+    "slug": "rhome-fire-app",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.rhomefire.app"
+    }
+  }
+}

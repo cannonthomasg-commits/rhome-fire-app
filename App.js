@@ -1,0 +1,28 @@
+import React, {useState} from 'react';
+import {SafeAreaView,ScrollView,View,Text,TextInput,Pressable,StyleSheet} from 'react-native';
+import {StatusBar} from 'expo-status-bar';
+const pages=['Dashboard','Personnel','Training','Certifications','Shift Calendar','Officer Tools'];
+const crew=[{name:'Demo Member 1',shift:'A'},{name:'Demo Member 2',shift:'B'},{name:'Demo Member 3',shift:'C'}];
+const colors={A:'#e36c6c',B:'#65a6ef',C:'#75c896'};
+function shift(date){const days=Math.floor((Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())-Date.UTC(2026,8,2))/86400000);return ['C','A','B'][Math.floor(((days%6)+6)%6/2)];}
+export default function App(){
+ const [page,setPage]=useState('Dashboard'),[query,setQuery]=useState(''),[title,setTitle]=useState(''),[drills,setDrills]=useState([]),[checked,setChecked]=useState({}),[month,setMonth]=useState(new Date(new Date().getFullYear(),new Date().getMonth(),1));
+ const today=new Date();
+ const button=(label,action)=> <Pressable accessibilityRole="button" key={label} onPress={action} style={s.button}><Text style={s.buttonText}>{label}</Text></Pressable>;
+ const card=(heading,body)=> <View key={heading} style={s.card}><Text style={s.heading}>{heading}</Text><Text style={s.body}>{body}</Text></View>;
+ const checks=['Review staffing and assignments','Review apparatus readiness','Review training objectives','Document shift handoff'];
+ return <SafeAreaView style={s.root}><StatusBar style="light"/><ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+ <Text style={s.brand}>RHOME FIRE</Text><Text style={s.subtitle}>Duty • Honor • Compassion • Service</Text>
+ <View style={s.notice}><Text style={s.body}>PROTOTYPE • Sample data • Changes last until the app closes</Text></View>
+ <View style={s.nav}>{pages.map(p=>button(p,()=>setPage(p)))}</View>
+ <Text accessibilityRole="header" style={s.title}>{page}</Text>
+ {page==='Dashboard'&&<>{card('On-duty shift',shift(today)+' Shift • 48 on / 96 off')}{card('Training sessions',String(drills.length)+' sessions entered in this demo')}{card('Getting started','Explore the modules below. Department accounts and cloud sync are not connected yet.')}{button('Log training',()=>setPage('Training'))}</>}
+ {page==='Personnel'&&<><TextInput accessibilityLabel="Search personnel" placeholder="Search sample personnel" placeholderTextColor="#9baac0" value={query} onChangeText={setQuery} style={s.input}/>{crew.filter(p=>p.name.toLowerCase().includes(query.toLowerCase())).map(p=>card(p.name,p.shift+' Shift • Sample record'))}</>}
+ {page==='Training'&&<><TextInput accessibilityLabel="Training topic" placeholder="Training topic" placeholderTextColor="#9baac0" value={title} onChangeText={setTitle} style={s.input}/>{button('Add session',()=>{if(title.trim()){setDrills([...drills,{id:Date.now(),title:title.trim()}]);setTitle('');}})}{drills.length===0&&card('No sessions yet','Add a training topic to try the session log.')}{drills.map(d=>card(d.title,'Draft session • Attendance and hours coming next'))}</>}
+ {page==='Certifications'&&<>{card('Certification tracker','Planned fields: member, credential, issuer, issue date, expiration date, and verification status.')}{['TCFP','EMS','CPR','Driver Operator','Hazmat','Fire Instructor','Fire Officer'].map(c=>card(c,'No department records loaded'))}</>}
+ {page==='Shift Calendar'&&<><View style={s.nav}>{button('Previous month',()=>setMonth(new Date(month.getFullYear(),month.getMonth()-1,1)))}{button('Next month',()=>setMonth(new Date(month.getFullYear(),month.getMonth()+1,1)))}</View><Text style={s.heading}>{month.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</Text><Text style={s.body}>A: red • B: blue • C: green. C begins September 2, 2026. Dates show the scheduled shift; shift-change time is not configured.</Text><View style={s.calendar}>{['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=><Text key={d} style={s.dayLabel}>{d}</Text>)}{Array.from({length:month.getDay()},(_,i)=><View key={'blank'+i} style={s.day}/>)}{Array.from({length:new Date(month.getFullYear(),month.getMonth()+1,0).getDate()},(_,i)=>{const team=shift(new Date(month.getFullYear(),month.getMonth(),i+1));return <View key={i} style={[s.day,{backgroundColor:colors[team]}]}><Text style={s.date}>{i+1}</Text><Text>{team}</Text></View>;})}</View></>}
+ {page==='Officer Tools'&&<>{card('Shift readiness','Prototype checklist for station use. Command tracking is planned for a later build.')}{checks.map(c=>button((checked[c]?'✓ ':'○ ')+c,()=>setChecked({...checked,[c]:!checked[c]})))}{button('Reset checklist',()=>setChecked({}))}</>}
+ </ScrollView></SafeAreaView>;
+}
+const s=StyleSheet.create({root:{flex:1,backgroundColor:'#0c1525'},content:{padding:20,paddingBottom:50},brand:{color:'#fff',fontWeight:'900',fontSize:30,letterSpacing:3},subtitle:{color:'#a6b5ca',marginTop:6,marginBottom:20},notice:{padding:12,backgroundColor:'#293246',borderRadius:10,marginBottom:16},title:{fontSize:28,fontWeight:'800',color:'#fff',marginVertical:20},nav:{flexDirection:'row',flexWrap:'wrap',gap:8},button:{backgroundColor:'#9d303b',padding:14,borderRadius:10,marginBottom:8},buttonText:{color:'#fff',fontWeight:'700'},card:{backgroundColor:'#18253a',padding:18,borderRadius:14,marginBottom:12},heading:{fontSize:18,fontWeight:'700',color:'#fff',marginBottom:8},body:{color:'#c6d1e1',lineHeight:22},input:{backgroundColor:'#18253a',color:'#fff',padding:16,borderRadius:10,marginBottom:12},calendar:{flexDirection:'row',flexWrap:'wrap',marginTop:18},dayLabel:{width:'14.28%',textAlign:'center',color:'#fff',paddingVertical:10},day:{width:'14.28%',minHeight:60,alignItems:'center',justifyContent:'center',borderWidth:2,borderColor:'#0c1525',borderRadius:6},date:{fontWeight:'800',fontSize:17}});
+
